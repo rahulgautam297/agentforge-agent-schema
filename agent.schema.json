@@ -1,0 +1,224 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agentforge.dev/schema/agent/v1.json",
+  "title": "AgentForge Agent Definition",
+  "description": "Structural schema for an AgentForge agent YAML definition. This schema enforces types, required fields, enums, and additionalProperties:false. It intentionally cannot express semantic/referential rules (e.g. whether a tool_id exists in the registry) — those are validated separately by agentforge-control-plane's semantic validation layer.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "agent", "model", "execution", "tools"],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "description": "Version of this schema the document conforms to.",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$"
+    },
+    "agent": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "display_name", "description", "owner"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Machine-readable unique identifier for the agent.",
+          "pattern": "^[a-z0-9-]{3,64}$"
+        },
+        "display_name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "description": {
+          "type": "string",
+          "minLength": 10
+        },
+        "owner": {
+          "type": "string",
+          "description": "Team or individual responsible for this agent."
+        },
+        "version": {
+          "type": "string",
+          "pattern": "^\\d+\\.\\d+\\.\\d+$",
+          "default": "0.1.0"
+        },
+        "tags": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "model": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["provider", "model_id"],
+      "properties": {
+        "provider": {
+          "type": "string",
+          "enum": ["bedrock", "mock", "openai"]
+        },
+        "model_id": {
+          "type": "string"
+        },
+        "params": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "temperature": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 2,
+              "default": 0.7
+            },
+            "max_tokens": {
+              "type": "integer",
+              "exclusiveMinimum": 0,
+              "default": 4096
+            },
+            "top_p": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            }
+          }
+        }
+      }
+    },
+    "execution": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["mode"],
+      "properties": {
+        "mode": {
+          "type": "string",
+          "enum": ["ephemeral", "durable", "human_in_loop"]
+        },
+        "timeout_seconds": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 86400,
+          "default": 300
+        },
+        "retry_policy": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "max_attempts": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 10,
+              "default": 3
+            },
+            "backoff_seconds": {
+              "type": "integer",
+              "exclusiveMinimum": 0,
+              "default": 5
+            }
+          }
+        }
+      }
+    },
+    "knowledge": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["knowledge_base_id"],
+        "properties": {
+          "knowledge_base_id": { "type": "string" },
+          "top_k": { "type": "integer", "exclusiveMinimum": 0, "default": 5 },
+          "filters": { "type": "object" }
+        }
+      }
+    },
+    "memory": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "working": { "type": "boolean", "default": true },
+        "episodic": { "type": "boolean", "default": false },
+        "semantic": { "type": "boolean", "default": false },
+        "retention_days": { "type": "integer", "exclusiveMinimum": 0 }
+      }
+    },
+    "tools": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["tool_id", "permission"],
+        "properties": {
+          "tool_id": { "type": "string" },
+          "permission": {
+            "type": "string",
+            "enum": ["read", "write", "execute"]
+          },
+          "params": { "type": "object" }
+        }
+      }
+    },
+    "permissions": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "policy_refs": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "approval": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "checkpoints": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["node_id", "description", "approver_roles", "timeout_seconds", "on_timeout"],
+            "properties": {
+              "node_id": { "type": "string" },
+              "description": { "type": "string" },
+              "approver_roles": {
+                "type": "array",
+                "items": { "type": "string" }
+              },
+              "timeout_seconds": { "type": "integer", "exclusiveMinimum": 0 },
+              "on_timeout": {
+                "type": "string",
+                "enum": ["deny", "escalate"]
+              }
+            }
+          }
+        }
+      }
+    },
+    "observability": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "trace_sampling_rate": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "default": 1.0
+        },
+        "log_level": {
+          "type": "string",
+          "enum": ["debug", "info", "warn", "error"],
+          "default": "info"
+        }
+      }
+    },
+    "evaluation": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "eval_suite_refs": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "run_on_deploy": { "type": "boolean", "default": false }
+      }
+    }
+  }
+}

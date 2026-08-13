@@ -1,0 +1,100 @@
+# Full-featured AgentForge agent definition matching the flagship
+# "Production Incident Investigator" demo agent (see agentforge-showcase-agents/
+# incident-investigator/). Exercises every optional schema section.
+#
+# execution.mode is set to human_in_loop (rather than durable) because this
+# definition includes an approval checkpoint, and approval checkpoints are
+# only meaningful when the run can pause for a human decision. Per the
+# schema's semantic rule (enforced by control-plane, not by JSON Schema),
+# approval.checkpoints require execution.mode: human_in_loop.
+#
+# Note: human_in_loop execution implies durable, Temporal-backed execution
+# under the hood as well — a human-in-the-loop run must survive process
+# restarts and long approval-wait times, so the execution platform always
+# runs human_in_loop agents on the same Temporal durable-workflow substrate
+# used for execution.mode: durable.
+schema_version: "1.0.0"
+
+agent:
+  name: incident-investigator
+  display_name: Production Incident Investigator
+  description: >-
+    Investigates production latency and error-rate regressions by
+    correlating GitHub deploy history, Kubernetes cluster state, and
+    Prometheus metrics, then proposes and (with approval) executes a
+    remediation such as a rollback.
+  owner: platform-team
+  version: "0.1.0"
+  tags:
+    - flagship-demo
+    - incident-response
+    - production
+
+model:
+  provider: bedrock
+  model_id: anthropic.claude-sonnet-4-5
+  params:
+    temperature: 0.2
+    max_tokens: 8192
+    top_p: 0.9
+
+execution:
+  mode: human_in_loop
+  timeout_seconds: 3600
+  retry_policy:
+    max_attempts: 3
+    backoff_seconds: 30
+
+knowledge:
+  - knowledge_base_id: engineering-docs
+    top_k: 8
+  - knowledge_base_id: incident-history
+    top_k: 5
+    filters:
+      severity: ["sev1", "sev2"]
+
+memory:
+  working: true
+  episodic: true
+  semantic: true
+  retention_days: 180
+
+tools:
+  - tool_id: github
+    permission: read
+    params:
+      org: agentforge-demo
+  - tool_id: kubernetes
+    permission: read
+    params:
+      cluster: prod-us-east-1
+  - tool_id: prometheus
+    permission: read
+    params:
+      endpoint: https://prometheus.internal.agentforge.dev
+
+permissions:
+  policy_refs:
+    - production-read-only
+    - incident-response-standard
+
+approval:
+  checkpoints:
+    - node_id: production-rollback
+      description: >-
+        Requires explicit human approval before executing a rollback of a
+        production deployment.
+      approver_roles:
+        - sre-lead
+        - engineering-manager
+      timeout_seconds: 1800
+      on_timeout: deny
+
+observability:
+  trace_sampling_rate: 1.0
+  log_level: info
+
+evaluation:
+  eval_suite_refs:
+    - incident-investigator-regression-suite
+  run_on_deploy: true

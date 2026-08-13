@@ -1,0 +1,21 @@
+# Minimal valid AgentForge agent definition.
+# Exercises only the required top-level sections: schema_version, agent, model,
+# execution, tools. Every optional section (knowledge, memory, permissions,
+# approval, observability, evaluation) is omitted.
+schema_version: "1.0.0"
+
+agent:
+  name: hello-world-agent
+  display_name: Hello World Agent
+  description: A minimal agent used to smoke-test schema validation end to end.
+  owner: platform-team
+  version: "0.1.0"
+
+model:
+  provider: mock
+  model_id: mock-echo-v1
+
+execution:
+  mode: ephemeral
+
+tools: []
