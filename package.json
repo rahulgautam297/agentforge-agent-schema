@@ -1,0 +1,14 @@
+{
+  "name": "@agentforge/agent-schema",
+  "version": "1.0.0",
+  "description": "JSON Schema (draft 2020-12) contract for AgentForge agent YAML definitions.",
+  "main": "agent.schema.json",
+  "files": [
+    "agent.schema.json"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rahulgautam297/agentforge-agent-schema.git"
+  }
+}

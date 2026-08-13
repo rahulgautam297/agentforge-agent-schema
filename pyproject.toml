@@ -1,0 +1,36 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "agentforge-agent-schema"
+version = "1.0.0"
+description = "JSON Schema (draft 2020-12) contract for AgentForge agent YAML definitions."
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.9"
+authors = [
+    { name = "Rahul Gautam" },
+]
+
+[project.urls]
+Homepage = "https://github.com/rahulgautam297/agentforge-agent-schema"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/agentforge_agent_schema"]
+
+# The canonical schema file lives at the repo root (agent.schema.json) so that
+# non-Python consumers (npm package, editors, CI) can reference it directly
+# without reaching into a Python package layout. force-include copies that
+# single on-disk file into the wheel at build time without requiring a
+# duplicate copy to be maintained under src/.
+[tool.hatch.build.targets.wheel.force-include]
+"agent.schema.json" = "agentforge_agent_schema/agent.schema.json"
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "agent.schema.json",
+    "src/agentforge_agent_schema/**",
+    "README.md",
+    "LICENSE",
+]
