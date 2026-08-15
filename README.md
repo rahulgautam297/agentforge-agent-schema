@@ -57,7 +57,7 @@ Both layers must pass before an agent definition can be deployed.
 Add it as a pinned git dependency with [uv](https://docs.astral.sh/uv/):
 
 ```bash
-uv add "git+https://github.com/<org>/agentforge-agent-schema@v1.0.0"
+uv add "git+https://github.com/<org>/agentforge-agent-schema@v1.1.0"
 ```
 
 Load and validate with any draft-2020-12-capable validator, e.g.
@@ -79,7 +79,7 @@ Draft202012Validator(schema).validate(instance)
 Add it as a pinned git dependency with [pnpm](https://pnpm.io/):
 
 ```bash
-pnpm add "git+https://github.com/<org>/agentforge-agent-schema.git#v1.0.0"
+pnpm add "git+https://github.com/<org>/agentforge-agent-schema.git#v1.1.0"
 ```
 
 Feed `agent.schema.json` to Monaco's YAML language service (e.g. via

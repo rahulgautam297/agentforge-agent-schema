@@ -1,6 +1,6 @@
 {
   "name": "@agentforge/agent-schema",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "JSON Schema (draft 2020-12) contract for AgentForge agent YAML definitions.",
   "main": "agent.schema.json",
   "files": [

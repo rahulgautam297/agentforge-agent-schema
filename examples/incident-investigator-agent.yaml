@@ -13,7 +13,7 @@
 # restarts and long approval-wait times, so the execution platform always
 # runs human_in_loop agents on the same Temporal durable-workflow substrate
 # used for execution.mode: durable.
-schema_version: "1.0.0"
+schema_version: "1.1.0"
 
 agent:
   name: incident-investigator

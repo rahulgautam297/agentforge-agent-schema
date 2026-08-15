@@ -219,6 +219,19 @@
         },
         "run_on_deploy": { "type": "boolean", "default": false }
       }
+    },
+    "sub_agents": {
+      "type": "array",
+      "description": "Named delegation targets this agent (a Supervisor) can hand off to within a single execution. 'name' is the free-text delegation role label used in the graph (e.g. 'data', 'engineering', 'research'); 'agent_id' is the target agent's slug, resolved the same way tool_id/policy_ref/knowledge_base_id are resolved elsewhere in this schema.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "agent_id"],
+        "properties": {
+          "name": { "type": "string" },
+          "agent_id": { "type": "string" }
+        }
+      }
     }
   }
 }
